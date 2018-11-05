@@ -1,0 +1,10 @@
+html, body, #map-canvas {
+ 	font-family: sans-serif;
+ 	font-weight: bolder;
+ 	width: 100%;
+	height: 768px;
+	/*border: 4px solid #fafbfa;*/
+	/*margin-left:12.5%;*/
+	/*margin-top:?*/
+	/*1366x768*/
+}

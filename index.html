@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>FindJamaica.com- Your source for finding businesses on online.</title>
+    <link href="css/default.css" rel="stylesheet">
+    <style>
+
+        .brand-logo{
+            width:168px;
+            height:52px;
+
+            transform: scale(0.6, 0.6);
+            -ms-transform: scale(0.6, 0.6);
+            -webkit-transform: scale(0.6, 0.6);
+
+            margin:10px;
+            background-image: url("logo.png");
+            background-repeat: no-repeat;
+        }
+
+        @media (max-width:992px) {
+            .resize_message{
+              margin-top:20px;
+              font-size: 10.5px;
+            }
+            .push_navbar_down_ex{
+              height:100px;
+              background-color: #9fe4f5;
+            }
+            
+        }
+
+    </style>
+
+	<!-- http://maps.googleapis.com is V3 http://maps.google.com is V2 -->      
+	<!-- <script src="http://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script> -->
+	<!-- enter google api key here -->
+	<script src="https://maps.googleapis.com/maps/api/js?key=" type="text/javascript"></script>
+    
+	<script type="text/javascript">
+	var geocoder;
+
+	var myLocation=new google.maps.LatLng(18.0199374, -76.775);
+
+    function load(categoryVar) {
+      geocoder = new google.maps.Geocoder();
+      var map = new google.maps.Map(document.getElementById('map_canvas'), {
+        center: new google.maps.LatLng(18.0199374, -76.775),
+        zoom: 16,
+        mapTypeId: 'roadmap'
+      });
+      
+
+    var infoWindow = new google.maps.InfoWindow;
+
+    var infoWindow2 = new google.maps.InfoWindow;
+
+    downloadUrl("backend/phpsqlajax_genxml - just xml.php?q=" + categoryVar, function(data) {
+        
+        var xml = data.responseXML;
+        var markers = xml.documentElement.getElementsByTagName("marker");
+
+        var marker;
+
+        for (var i = 0; i < markers.length; i++) {
+
+          var name = markers[i].getAttribute("nametest");
+          var st = markers[i].getAttribute("st");
+          var parishPosCode = markers[i].getAttribute("parishPosCode");
+          var country = markers[i].getAttribute("country");
+
+          var address = st + ", " + parishPosCode + ", " + country;
+
+          var category = markers[i].getAttribute("category");
+          
+          var telephone = markers[i].getAttribute("teleph");
+
+          //icon type
+          var typeall = markers[i].getAttribute("icontype");
+
+
+          var location = address;
+
+          console.log("object"+i+"  "+location+"object"+"   "+i);
+
+
+          var html = "<p>Name of Business-  " + name + "</p>" + "<p>Address- " + address + "</p>" + "<p>Category- " + category + "</p>" + "<p>Telephone- "+"<a href="+"'"+"tel://"+telephone+"'"+">"+telephone+"</a>";
+
+          geocodeAddress(location,html);
+
+        }
+
+        function geocodeAddress(location, namesLoaderVals) {
+          geocoder.geocode( { 'address': location}, function(results, status) {
+            if (status == google.maps.GeocoderStatus.OK) {
+              map.setCenter(results[0].geometry.location);
+              map.setZoom(9);
+              createMarker(results[0].geometry.location,namesLoaderVals);
+
+            } else if (status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {    
+                console.log("Geocode was not successful for the following reason:" + status);
+                setTimeout(function() {
+                    //Geocode(address);
+                    geocodeAddress(location, namesLoaderVals);
+                }, 200);
+            } else {  
+                //alert("Geocode was not successful for the following reason:" + status);
+                //console.log('if not sucess see results message to the right- zero results no errors: ' + status);
+                console.log("Geocode was not successful for the following reason:" + status);
+            }
+          }); 
+        }
+
+
+        function createMarker(latlng,html){
+          var marker = new google.maps.Marker({
+            position: latlng,
+            icon: 'images/mm_icon.png',
+            map: map
+          }); 
+
+          google.maps.event.addListener(marker, 'click', function() { 
+            infoWindow2.setContent(html);
+            infoWindow2.open(map, marker);
+          });
+          
+          
+        }
+
+
+
+
+        var htmlMyLocation = "<p><b>WELCOME!</b></p>"+"<img border='0' src=" + "images/smilely-veryhappy-23x24.png" + " alt='' width='23' height='24'>";
+
+
+        var markerCenter=new google.maps.Marker({
+          position:myLocation,
+          map: map,
+          draggable: false,
+          icon:'images/jamaica-flag-64x64.png',
+          animation:google.maps.Animation.BOUNCE
+        });
+
+        bindInfoWindow(marker, map, infoWindow, html, markerCenter, htmlMyLocation, i);
+        
+
+        
+        function bindInfoWindow(marker, map, infoWindow, html, markerCenter, htmlMyLocation) {
+			
+			google.maps.event.addListener(markerCenter, 'click', function() {
+                infoWindow.setContent(htmlMyLocation);
+                infoWindow.open(map, markerCenter);
+            });
+        }
+
+     });
+
+    
+    }
+
+
+
+    function downloadUrl(url, callback) {
+      var request = window.ActiveXObject ?
+          new ActiveXObject('Microsoft.XMLHTTP') :
+          new XMLHttpRequest;
+
+      request.onreadystatechange = function() {
+        if (request.readyState == 4) {
+          request.onreadystatechange = doNothing;
+          callback(request, request.status);
+        }
+      };
+
+      request.open('GET', url, true);
+      request.send(null);
+    }
+
+    function doNothing() {}
+
+
+  </script>
+
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-53104341-2', 'auto');
+  ga('send', 'pageview');
+
+  </script>
+  
+  </head>
+
+  <body onload="load( 'Tours Services' )">
+    
+    <div class="navbar-wrapper push_navbar_down_ex" style="/*display:initial;*/">
+      <!--  Color: yellow darken-1 -->
+      <nav class="blue darken-1" style="height:100px;">
+          <!-- container -->
+        <div class="nav-wrapper" style="margin-left:20px;">
+          <!-- <a href="#!" class="brand-logo">&nbsp;FindJamaica</a> -->
+          <div class="brand-logo" style=""></div>  
+          <a href="#" data-activates="mobile-demo" class="button-always-menu" style=""><i class="mdi-navigation-menu"></i></a>
+
+            <ul class="side-nav" id="mobile-demo" style="font-size:8px;">
+
+                  <li><a href="javascript:load('null-null')"><h4>Choose a Category</h4></a></li> 
+        					<li><a href="javascript:load('Accounting Services')">Accounting Services</a></li>
+        					<li><a href="javascript:load('Advertising')">Advertising</a></li>
+        					<li><a href="javascript:load('Architectural & Construction sales and services')">Architectural & Construction sales and services</a></li>
+        					<li><a href="javascript:load('Architectural Services')">Architectural Services</a></li>
+        					<li><a href="javascript:load('Attorney- at -law')">Attorney- at -law</a></li>
+        					<li><a href="javascript:load('attorneys-at-law')">attorneys-at-law</a></li>
+        					<li><a href="javascript:load('Auto Parts & Accessories Sale')">Auto Parts & Accessories Sale</a></li>
+        					<li><a href="javascript:load('Auto Parts Sale')">Auto Parts Sale</a></li>
+        					<li><a href="javascript:load('Auto Repairs')">Auto Repairs</a></li>
+        					<li><a href="javascript:load('Bakery')">Bakery</a></li>
+        					<li><a href="javascript:load('Bar')">Bar</a></li>
+        					<li><a href="javascript:load('Barber Salon')">Barber Salon</a></li>
+        					<li><a href="javascript:load('Beauty Culture School')">Beauty Culture School</a></li>
+        					<li><a href="javascript:load('Beauty Salon')">Beauty Salon</a></li>
+        					<li><a href="javascript:load('Beauty Salon & Boutique')">Beauty Salon & Boutique</a></li>
+        					<li><a href="javascript:load('Boutique')">Boutique</a></li>
+        					<li><a href="javascript:load('Business Consultancy')">Business Consultancy</a></li>
+        					<li><a href="javascript:load('Car Rental')">Car Rental</a></li>
+        					<li><a href="javascript:load('Catering Services')">Catering Services</a></li>
+        					<li><a href="javascript:load('Club')">Club</a></li>
+        					<li><a href="javascript:load('Computer Supplies & Service')">Computer Supplies & Service</a></li>
+        					<li><a href="javascript:load('Computer Technology')">Computer Technology</a></li>
+        					<li><a href="javascript:load('Construction Services')">Construction Services</a></li>
+        					<li><a href="javascript:load('Consultancy Services')">Consultancy Services</a></li>
+        					<li><a href="javascript:load('Cosmetology')">Cosmetology</a></li>
+        					<li><a href="javascript:load('Courier Services')">Courier Services</a></li>
+        					<li><a href="javascript:load('Daycare')">Daycare</a></li>
+        					<li><a href="javascript:load('Debt Collection Services')">Debt Collection Services</a></li>
+        					<li><a href="javascript:load('Desk Top Publishing')">Desk Top Publishing</a></li>
+        					<li><a href="javascript:load('Dressmaking')">Dressmaking</a></li>
+        					<li><a href="javascript:load('Driving School')">Driving School</a></li>
+        					<li><a href="javascript:load('Electrical Repair Service')">Electrical Repair Service</a></li>
+        					<li><a href="javascript:load('Employment Agency')">Employment Agency</a></li>
+        					<li><a href="javascript:load('Entertainment Promotions')">Entertainment Promotions</a></li>
+        					<li><a href="javascript:load('Farming')">Farming</a></li>
+        					<li><a href="javascript:load('Fashion Designing')">Fashion Designing</a></li>
+        					<li><a href="javascript:load('Flowers Shop')">Flowers Shop</a></li>
+        					<li><a href="javascript:load('Garage')">Garage</a></li>
+        					<li><a href="javascript:load('Garage & Sale of Auto Parts')">Garage & Sale of Auto Parts</a></li>
+        					<li><a href="javascript:load('Gift Shop')">Gift Shop</a></li>
+        					<li><a href="javascript:load('Golden Age Home')">Golden Age Home</a></li>
+        					<li><a href="javascript:load('Guyanese')">Guyanese</a></li>
+        					<li><a href="javascript:load('Gym')">Gym</a></li>
+        					<li><a href="javascript:load('Haberdashery')">Haberdashery</a></li>
+        					<li><a href="javascript:load('Hardware')">Hardware</a></li>
+        					<li><a href="javascript:load('Hotel')">Hotel</a></li>
+        					<li><a href="javascript:load('Import & Export')">Import & Export</a></li>
+        					<li><a href="javascript:load('Information Technology Services')">Information Technology Services</a></li>
+        					<li><a href="javascript:load('Installation & Sale of Electronic Equiptment')">Installation & Sale of Electronic Equiptment</a></li>
+        					<li><a href="javascript:load('Interior Decorating Services')">Interior Decorating Services</a></li>
+        					<li><a href="javascript:load('Janitorial Services')">Janitorial Services</a></li>
+        					<li><a href="javascript:load('Jewellery Store')">Jewellery Store</a></li>
+        					<li><a href="javascript:load('Landscaping')">Landscaping</a></li>
+        					<li><a href="javascript:load('Locksmith')">Locksmith</a></li>
+        					<li><a href="javascript:load('Maintenance Consultant')">Maintenance Consultant</a></li>
+        					<li><a href="javascript:load('Manufacture & Sale of Building Blocks')">Manufacture & Sale of Building Blocks</a></li>
+        					<li><a href="javascript:load('Manufacture & Sale Of Craft Items')">Manufacture & Sale Of Craft Items</a></li>
+        					<li><a href="javascript:load('Manufacture & Sale of Furniture')">Manufacture & Sale of Furniture</a></li>
+        					<li><a href="javascript:load('Manufacture & Sale of Garments')">Manufacture & Sale of Garments</a></li>
+        					<li><a href="javascript:load('Manufacturing & Sale of Furniture')">Manufacturing & Sale of Furniture</a></li>
+        					<li><a href="javascript:load('Marketing Services')">Marketing Services</a></li>
+        					<li><a href="javascript:load('Massage Services')">Massage Services</a></li>
+        					<li><a href="javascript:load('Medical Practice')">Medical Practice</a></li>
+        					<li><a href="javascript:load('Pest control services')">Pest control services</a></li>
+        					<li><a href="javascript:load('Pharmacist')">Pharmacist</a></li>
+        					<li><a href="javascript:load('Pharmacy & Gift Centre')">Pharmacy & Gift Centre</a></li>
+        					<li><a href="javascript:load('Photo Service')">Photo Service</a></li>
+        					<li><a href="javascript:load('Physio-Therapy Service')">Physio-Therapy Service</a></li>
+        					<li><a href="javascript:load('Plumbing Services')">Plumbing Services</a></li>
+        					<li><a href="javascript:load('Printing Services')">Printing Services</a></li>
+        					<li><a href="javascript:load('Private Investigating Services')">Private Investigating Services</a></li>
+        					<li><a href="javascript:load('Real Estate Agency')">Real Estate Agency</a></li>
+        					<li><a href="javascript:load('Rebuilding Automotive & Machinery Parts')">Rebuilding Automotive & Machinery Parts</a></li>
+        					<li><a href="javascript:load('Record Producing & Sale')">Record Producing & Sale</a></li>
+        					<li><a href="javascript:load('Rental of Premises')">Rental of Premises</a></li>
+        					<li><a href="javascript:load('Rental Of Video Cassette')">Rental Of Video Cassette</a></li>
+        					<li><a href="javascript:load('Restaurant')">Restaurant</a></li>
+        					<li><a href="javascript:load('Retail')">Retail</a></li>
+        					<li><a href="javascript:load('Roofing Services')">Roofing Services</a></li>
+        					<li><a href="javascript:load('Sale of Accessories')">Sale of Accessories</a></li>
+        					<li><a href="javascript:load('Sale of Auto Parts')">Sale of Auto Parts</a></li>
+        					<li><a href="javascript:load('Sale of Chemical Supplies')">Sale of Chemical Supplies</a></li>
+        					<li><a href="javascript:load('Sale of Computer Accessories')">Sale of Computer Accessories</a></li>
+        					<li><a href="javascript:load('Sale of Cosmetics')">Sale of Cosmetics</a></li>
+        					<li><a href="javascript:load('Sale of Dry Goods')">Sale of Dry Goods</a></li>
+        					<li><a href="javascript:load('Sale of electronic Items')">Sale of electronic Items</a></li>
+        					<li><a href="javascript:load('Sale of Farm Supplies')">Sale of Farm Supplies</a></li>
+        					<li><a href="javascript:load('Sale Of Garments')">Sale Of Garments</a></li>
+        					<li><a href="javascript:load('Sale of Garments & Accessories')">Sale of Garments & Accessories</a></li>
+        					<li><a href="javascript:load('Sale of Garments & Cosmetics')">Sale of Garments & Cosmetics</a></li>
+        					<li><a href="javascript:load('Sale Of General Merchandise')">Sale Of General Merchandise</a></li>
+        					<li><a href="javascript:load('Sale of Groceries')">Sale of Groceries</a></li>
+        					<li><a href="javascript:load('Sale of Juices')">Sale of Juices</a></li>
+        					<li><a href="javascript:load('Sale of Meats')">Sale of Meats</a></li>
+        					<li><a href="javascript:load('sale of pastries')">sale of pastries</a></li>
+        					<li><a href="javascript:load('Sale of Rentals')">Sale of Rentals</a></li>
+        					<li><a href="javascript:load('Sale of Safety Equipment')">Sale of Safety Equipment</a></li>
+        					<li><a href="javascript:load('Sale of Stationery & Office Supplies')">Sale of Stationery & Office Supplies</a></li>
+        					<li><a href="javascript:load('School')">School</a></li>
+        					<li><a href="javascript:load('Secretarial Services')">Secretarial Services</a></li>
+        					<li><a href="javascript:load('Security Service')">Security Service</a></li>
+        					<li><a href="javascript:load('Tailoring')">Tailoring</a></li>
+        					<li><a href="javascript:load('Taxi Services')">Taxi Services</a></li>
+        					<li><a href="javascript:load('Tiling Services')">Tiling Services</a></li>
+        					<li><a href="javascript:load('Tours Services')">Tours Services</a></li>
+        					<li><a href="javascript:load('Transportation Services')">Transportation Services</a></li>
+        					<li><a href="javascript:load('Variety Store')">Variety Store</a></li>
+        					<li><a href="javascript:load('Wholesale')">Wholesale</a></li>
+
+            </ul>
+        </div>
+      </nav>
+    </div>
+
+    <div class="resize_message" style="position:relative; z-index:100;">    
+      <div style=" color:white; margin-top:-50px; text-align: right;">
+      <p style="font-weight:100">Alpha version 1.2 (Optimized for Desktop and Chrome Browser).</p></div>
+    </div>
+
+
+    <div id="map_canvas" style="height:100%; /*top:20px;*/"></div>    
+
+    </div>
+
+	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+	<script type="text/javascript" src="js/materialize.min.js"></script>
+	    
+	<script>
+	$(".button-always-menu").sideNav({closeOnClick: true, menuWidth: 900});
+	</script>
+
+  </body>
+
+</html>
